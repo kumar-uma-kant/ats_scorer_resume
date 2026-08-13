@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual Environment
+myenv/
+
+# Environment Variables
+.env
+
+# Logs
+*.log
+backend/logs/
+
+# VS Code
+.vscode/
+
+# Fine-tuned ML model
+ml model/finetuned_model/content/models/finetuned-bert/
