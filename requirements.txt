@@ -24,6 +24,7 @@ python-dotenv>=1.0
 # rapidfuzz>=3.6
 
 # ── Backend: NLP / ML ──
+
 spacy>=3.7,<4.0
 sentence-transformers==5.6.0
 torch==2.13.0+cpu
