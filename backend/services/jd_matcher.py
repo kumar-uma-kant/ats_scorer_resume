@@ -1,9 +1,6 @@
-from typing import List, Dict
-import numpy as np
-import spacy
-from sentence_transformers import SentenceTransformer
 
-from typing import List, Dict
+import logging
+from typing import List, Dict, Optional
 import numpy as np
 import spacy
 from sentence_transformers import SentenceTransformer
@@ -13,11 +10,34 @@ from rapidfuzz import fuzz
 
 
 def calculate_semantic_similarity(
-    resume_text: str, jd_text: str, embedder: SentenceTransformer
-) -> float:
-    resume_emb = embedder.encode(resume_text[:5000], convert_to_tensor=False)
-    jd_emb     = embedder.encode(jd_text[:5000], convert_to_tensor=False)
+    resume_text: str, 
+    jd_text: str,
+    embedder: SentenceTransformer,
+    finetuned_model: Optional[SentenceTransformer] = None,
+    ) -> float:
 
+    """
+    Calculate semantic similarity between a resume and job description.
+
+    Uses the fine-tuned ATS model when available.
+    Falls back to the existing embedder if the fine-tuned model
+    is not available.
+    """
+
+    # Prefer the fine-tuned ATS model for Resume ↔ JD matching.
+    model = finetuned_model if finetuned_model is not None else embedder
+    
+    if finetuned_model is not None:
+        logger = logging.getLogger("ats_resume_scorer")
+        logger.info("Using FINE-TUNED model for Resume - JD semantic matching")
+    else:
+        logger = logging.getLogger("ats_resume_scorer")
+        logger.warning("Using BASE embedder for Resume - JD semantic matching")
+    
+    resume_emb = model.encode(resume_text[:5000], convert_to_tensor=False)
+    jd_emb     = model.encode(jd_text[:5000], convert_to_tensor=False)
+
+    
     similarity = np.dot(resume_emb, jd_emb) / (
         np.linalg.norm(resume_emb) * np.linalg.norm(jd_emb)
     )
@@ -96,9 +116,10 @@ def compare_resume_with_jd(
     jd_text: str,
     jd_keywords: List[str],
     embedder: SentenceTransformer,
-    nlp: spacy.Language,
+    nlp: spacy.Language ,
+    finetuned_model: Optional[SentenceTransformer] = None,
 ) -> Dict:
-    semantic_similarity = calculate_semantic_similarity(resume_text, jd_text, embedder)
+    semantic_similarity = calculate_semantic_similarity(resume_text, jd_text, embedder,finetuned_model)
     matched_keywords    = identify_matched_keywords(resume_keywords, jd_keywords)
     missing_keywords    = identify_missing_keywords(resume_keywords, jd_keywords)
     skills_gap          = analyze_skills_gap(resume_skills, jd_text, nlp)

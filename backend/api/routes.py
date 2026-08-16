@@ -33,6 +33,9 @@ async def analyze_resume(
     nlp      = request.app.state.nlp
     embedder = request.app.state.embedder
 
+    # after uploading fined tuned model on huggingface
+    finetuned_model = request.app.state.finetuned_model
+
 
     try:
         file_bytes = await resume.read()
@@ -62,6 +65,7 @@ async def analyze_resume(
             resume_text=resume_text,
             nlp=nlp,
             embedder=embedder,
+            finetuned_model=finetuned_model,
             job_description=job_description
         )
     except Exception as exc:
@@ -128,6 +132,7 @@ async def health_check(request: Request):
         'status':          'healthy',
         'nlp_loaded':      request.app.state.nlp is not None,
         'embedder_loaded': request.app.state.embedder is not None,
+        'finetuned_model_loaded': request.app.state.finetuned_model is not None,
     }
 
 @router.get('/history')

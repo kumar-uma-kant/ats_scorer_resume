@@ -12,6 +12,7 @@ def analyze_full_resume(
     resume_text: str,
     nlp: spacy.Language,
     embedder: SentenceTransformer,
+    finetuned_model: Optional[SentenceTransformer] = None,
     job_description: Optional[str] = None,
 ) -> Dict:
     import logging
@@ -62,6 +63,7 @@ def analyze_full_resume(
             jd_text=job_description.strip(),
             jd_keywords=jd_keywords,
             embedder=embedder,
+            finetuned_model=finetuned_model,
             nlp=nlp,
         )
 

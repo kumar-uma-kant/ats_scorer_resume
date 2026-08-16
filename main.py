@@ -1,4 +1,5 @@
 import sys
+import os
 
 # Patch asyncio ProactorEventLoop on Windows to suppress harmless "ConnectionResetError: [WinError 10054]"
 # which occurs when a client/browser disconnects abruptly.
@@ -28,7 +29,9 @@ from backend.core.config import(
     APP_TITLE, 
     APP_VERSION, 
     SPACY_MODEL_PRIMARY, 
-    SPACY_MODEL_SECONDARY, SENTENCE_TRANSFORMER_MODEL
+    SPACY_MODEL_SECONDARY,
+    SENTENCE_TRANSFORMER_MODEL,
+    FINETUNED_MODEL_ID
 )
 from backend.api.routes import router
 
@@ -56,6 +59,17 @@ async def lifespan(app:FastAPI):
     from sentence_transformers import SentenceTransformer
     app.state.embedder = SentenceTransformer(SENTENCE_TRANSFORMER_MODEL)
     logger.info(f'Loaded {SENTENCE_TRANSFORMER_MODEL}')
+
+    # after uploaded fined tuned model on huggingface 
+
+    # Load fine-tuned ATS model from Hugging Face
+    HF_TOKEN = os.getenv("HF_TOKEN")
+    logger.info(f'Loading fine-tuned ATS model: {FINETUNED_MODEL_ID}')
+    app.state.finetuned_model = SentenceTransformer(
+    FINETUNED_MODEL_ID,
+     token=HF_TOKEN,
+    )
+    logger.info(f'Loaded fine-tuned ATS model: {FINETUNED_MODEL_ID}')
 
     logger.info('All models loaded. API is ready to serve requests.')
 
